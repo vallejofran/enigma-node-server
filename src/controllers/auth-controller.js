@@ -11,6 +11,7 @@ const { JWTgenerator } = require('../helpers/jwt-generator');
 // Controlador para registrar un nuevo usuario
 const registerUser = async (req, res) => {
     try {
+        
         // Obtener los datos del usuario desde el cuerpo de la solicitud
         const { username, firstname, lastname, email, password } = req.body;
 

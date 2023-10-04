@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
 
 router.post('/register', authController.registerUser);
 
-router.post('/login', [
+router.post('/lgoin', [
     check('email', 'El correo es obligatorio').isEmail(),
     check('password', 'La contraseña es obligatoria').not().isEmpty(),
     fieldsValidator

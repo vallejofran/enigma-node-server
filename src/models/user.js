@@ -28,11 +28,11 @@ const userSchema = new mongoose.Schema({
     },
     img: {
         type: String,
-        required: true
+        required: false
     },
     role: {
         type: String,
-        required: true,
+        required: false,
         default: 'USER_ROLE',
         emun: ['ADMIN_ROLE', 'USER_ROLE']
     },
