@@ -4,15 +4,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 
-function authenticationMiddleware(req, res, next) {
-    // Split "bearer" string
-    const token = req.headers.authorization.split(' ')[1];
-    // return res.status(200).json({ token });
+function authMiddleware(req, res, next) {
 
-    if (!token) {
-        return res.status(401).json({ message: 'Token de autenticación no proporcionado' });
-    }
+    const token = req.header('x-token');
 
+    if (!token) return res.status(401).json({ message: 'Token de autenticación no proporcionado' });
+    
     try {
         const secretKey = process.env.SECRET_KEY
 
@@ -33,11 +30,15 @@ function authenticationMiddleware(req, res, next) {
             // Verificar si el usuario existe en la base de datos
             const existingUser = await User.findOne({ email });
 
-            if (!existingUser) {
-                return res.status(403).json({ message: 'Acceso denegado' });    
-            }
+            if (!existingUser) return res.status(403).json({ message: 'Acceso denegado' });    
             
             // El usuario tiene acceso, puedes continuar con el siguiente middleware o controlador
+            const params = {
+                user: existingUser,
+                token
+            }
+
+            req.params = params
             next();
         });
 
@@ -47,4 +48,4 @@ function authenticationMiddleware(req, res, next) {
     }
 }
 
-module.exports = authenticationMiddleware;
+module.exports = authMiddleware;

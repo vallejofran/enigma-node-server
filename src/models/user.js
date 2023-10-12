@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true,
+        required: false,
         unique: true
     },
     firstname: {
@@ -24,29 +24,32 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     img: {
         type: String,
-        required: false
     },
     role: {
         type: String,
-        required: false,
         default: 'USER_ROLE',
-        emun: ['ADMIN_ROLE', 'USER_ROLE']
+        emun: ['ADMIN_ROLE', 'USER_ROLE'],
+        select: false
     },
     state: {
         type: Boolean,
-        default: true
+        default: true,
+        select: false
     },
     google: {
         type: Boolean,
-        default: false
+        default: false,
+        select: false
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        select: false
     }
 });
 

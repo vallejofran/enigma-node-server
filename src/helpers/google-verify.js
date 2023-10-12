@@ -4,19 +4,20 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleVerify = async (token = '') => {
     const ticket = await client.verifyIdToken({
-        token,
+        idToken: token,
         audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
         // Or, if multiple clients access the backend:
         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
     });
 
     const {
-        name: username,
-        picture: img,
+        given_name,
+        family_name,
+        picture,
         email
     } = ticket.getPayload();
-
-    return { username, img, email };
+    
+    return { firstname: given_name, lastname: family_name, img: picture, email };
 }
 
 module.exports = {

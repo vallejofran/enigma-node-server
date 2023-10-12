@@ -3,7 +3,9 @@ const router = express.Router();
 const { check } = require('express-validator');
 
 const authController = require('../controllers/auth-controller')
+
 const {fieldsValidator} = require('../middlewares/fields-validator')
+const authMiddleware = require('../middlewares/jwt-autorization')
 
 
 router.get('/', (req, res) => {
@@ -12,26 +14,16 @@ router.get('/', (req, res) => {
 
 router.post('/register', authController.registerUser);
 
-router.post('/lgoin', [
+router.post('/login', [
     check('email', 'El correo es obligatorio').isEmail(),
     check('password', 'La contraseña es obligatoria').not().isEmpty(),
     fieldsValidator
 ], authController.loginUser);
 
-router.post('/login-with-google', [
+router.post('/login-google', [
     check('token', 'El token es necesario').not().isEmpty(),
 ], authController.googleSignin);
 
-
-
-router.put('/users/:id', (req, res) => {
-    // Manejar la petición PUT a '/users/:id'
-    // Actualizar un usuario con el ID proporcionado
-});
-
-router.delete('/users/:id', (req, res) => {
-    // Manejar la petición DELETE a '/users/:id'
-    // Eliminar un usuario con el ID proporcionado
-});
+router.post('/validate-token', authMiddleware, authController.validateToken);
 
 module.exports = router;
