@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const cors = require('cors');
 
 const { connectDb } = require('./database/mongo-conn');
-const { socketController } = require('./sockets/socketsController')
+const { socketController } = require('./sockets/controllers/socketsController')
 const routes = require('./routes')
 
 
@@ -51,6 +51,7 @@ class ServerApp {
 
     sockets() {
         this.io.on('connection', (socket) => socketController(socket, this.io))
+        // this.io.on('connection', socketController)
     }
 
     listen() {

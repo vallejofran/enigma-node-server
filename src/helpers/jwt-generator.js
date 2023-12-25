@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-
+const User = require('../models/user')
 
 const JWTgenerator = (payload = '') => {
     return new Promise((resolve, reject) => {
@@ -10,6 +10,22 @@ const JWTgenerator = (payload = '') => {
     })
 }
 
+const JWTVerify = async (token = '') => {
+    if (token.length < 10) return null
+
+    try {
+        const { email } = jwt.verify(token, process.env.SECRET_KEY)
+
+        const user = await User.findOne({ email })
+        if (!user) return null
+
+        return user
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 module.exports = {
-    JWTgenerator
+    JWTgenerator,
+    JWTVerify
 }

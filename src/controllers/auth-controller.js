@@ -111,7 +111,8 @@ const googleSignin = async (req, res = response) => {
 
 const validateToken = (req, res) => {
     const { params } = req
-    res.status(200).json(params.token)
+    if (params.token) res.status(200).json(params.token)
+    else res.status(400).json({ message: 'Token no es válido' })
 }
 
 
