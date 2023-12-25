@@ -1,4 +1,4 @@
-const Server = require('./src/server')
-const server = new Server()
+import Server from "./src/server.js";
 
-server.listen()
+const server = new Server();
+server.listen();

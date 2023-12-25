@@ -1,10 +1,10 @@
-const express = require('express');
-const router = express.Router();
+import { Router } from "express";
+const router = Router();
 
-const authRoutes = require('./auth-routes');
-const protectedRoutes = require('./protected-routes');
+import authRoutes from "./auth-routes.js";
+import protectedRoutes from "./protected-routes.js";
 
-router.use('/auth', authRoutes);
-router.use('/protected', protectedRoutes);
+router.use("/auth", authRoutes);
+router.use("/protected", protectedRoutes);
 
-module.exports = router;
+export default router;

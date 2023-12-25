@@ -1,51 +1,51 @@
-require('dotenv').config();
+// require("dotenv").config();
 
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-
+import { verify } from "jsonwebtoken";
+import User from "../models/user.js";
 
 function authMiddleware(req, res, next) {
+  const token = req.header("x-token");
 
-    const token = req.header('x-token');
+  if (!token)
+    return res
+      .status(401)
+      .json({ message: "Token de autenticación no proporcionado" });
 
-    if (!token) return res.status(401).json({ message: 'Token de autenticación no proporcionado' });
-    
-    try {
-        const secretKey = process.env.SECRET_KEY
+  try {
+    const secretKey = process.env.SECRET_KEY;
 
-        jwt.verify(token, secretKey, async (err, decoded) => {
-            if (err) {
-                if (err.name === 'TokenExpiredError') {
-                    // El token ha caducado
-                    return res.status(401).json({ error: 'Token expirado' });
-                } else {
-                    // El token es inválido por otra razón
-                    return res.status(401).json({ error: 'Token inválido' });
-                }
-            }
+    verify(token, secretKey, async (err, decoded) => {
+      if (err) {
+        if (err.name === "TokenExpiredError") {
+          // El token ha caducado
+          return res.status(401).json({ error: "Token expirado" });
+        } else {
+          // El token es inválido por otra razón
+          return res.status(401).json({ error: "Token inválido" });
+        }
+      }
 
-            // El token es válido y no ha caducado
-            const email = decoded.email;
+      // El token es válido y no ha caducado
+      const email = decoded.email;
 
-            // Verificar si el usuario existe en la base de datos
-            const existingUser = await User.findOne({ email });
+      // Verificar si el usuario existe en la base de datos
+      const existingUser = await User.findOne({ email });
 
-            if (!existingUser) return res.status(403).json({ message: 'Acceso denegado' });    
-            
-            // El usuario tiene acceso, puedes continuar con el siguiente middleware o controlador
-            const params = {
-                user: existingUser,
-                token
-            }
+      if (!existingUser)
+        return res.status(403).json({ message: "Acceso denegado" });
 
-            req.params = params
-            next();
-        });
+      // El usuario tiene acceso, puedes continuar con el siguiente middleware o controlador
+      const params = {
+        user: existingUser,
+        token,
+      };
 
-    } catch (error) {
-        console.log(error)
-        return res.status(401).json({ message: 'Token de autenticación inválido' });
-    }
+      req.params = params;
+      next();
+    });
+  } catch (error) {
+    return res.status(401).json({ message: "Token de autenticación inválido" });
+  }
 }
 
-module.exports = authMiddleware;
+export default authMiddleware;

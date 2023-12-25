@@ -1,66 +1,66 @@
-require('dotenv').config();
-const express = require('express');
-const { createServer } = require('http')
-const { Server } = require("socket.io");
+import dotenv from "dotenv";
+dotenv.config();
+import express, { json, urlencoded } from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
-const cors = require('cors');
+import cors from "cors";
 
-const { connectDb } = require('./database/mongo-conn');
-const { socketController } = require('./sockets/controllers/socketsController')
-const routes = require('./routes')
-
+import connectDb from "./database/mongo-conn.js";
+import socketController from "./sockets/controllers/sockets-controller.js";
+import routes from "./routes/index.js";
 
 class ServerApp {
-    constructor() {
-        this.port = process.env.PORT
-        this.app = express()
-        this.server = createServer(this.app)
-        this.io = new Server(this.server, {
-            cors: {
-                origin: "*",
-                // methods: ["GET", "POST"],
-                // credentials: true
-            }
-        });
+  constructor() {
+    this.port = process.env.PORT;
+    this.app = express();
+    this.server = createServer(this.app);
+    this.io = new Server(this.server, {
+      cors: {
+        origin: "*",
+        // methods: ["GET", "POST"],
+        // credentials: true
+      },
+    });
 
-        // Middlewares
-        this.middlewares()
+    // Middlewares
+    this.middlewares();
 
-        // Routes
-        this.routes()
+    // Routes
+    this.routes();
 
-        // Sockets
-        this.sockets()
-    }
+    // Sockets
+    this.sockets();
+  }
 
-    middlewares() {
-        const corsOptions = {
-            origin: '*', // URL del cliente React
-            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
-            credentials: true, // Permite enviar y recibir cookies
-        };
+  middlewares() {
+    const corsOptions = {
+      origin: "*", // URL del cliente React
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Métodos permitidos
+      credentials: true, // Permite enviar y recibir cookies
+    };
 
-        this.app.use(cors());
-        this.app.use(express.json())
-        this.app.use(express.urlencoded({ extended: true }))
-    }
+    this.app.use(cors());
+    this.app.use(json());
+    this.app.use(urlencoded({ extended: true }));
+  }
 
-    routes() {
-        this.app.use('/', routes)
-    }
+  routes() {
+    this.app.use("/", routes);
+  }
 
-    sockets() {
-        this.io.on('connection', (socket) => socketController(socket, this.io))
-        // this.io.on('connection', socketController)
-    }
+  sockets() {
+    this.io.on("connection", (socket) => socketController(socket, this.io));
+    // this.io.on('connection', socketController)
+  }
 
-    listen() {
-        this.server.listen(this.port, () => {
-            console.log(`Servidor en funcionamiento en el puerto ${this.port}`)
-            // Connect to MognoDB 
-            connectDb()
-        });
-    }
+  listen() {
+    this.server.listen(this.port, () => {
+      console.log(`Servidor en funcionamiento en el puerto ${this.port}`);
+      // Connect to MognoDB
+      connectDb();
+    });
+  }
 }
 
-module.exports = ServerApp
+export default ServerApp;

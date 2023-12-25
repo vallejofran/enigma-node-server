@@ -1,17 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const authMiddleware = require('../middlewares/jwt-autorization')
+import { Router } from "express";
+const router = Router();
 
-// const usersController = require('../controllers/users-controller')
+import authMiddleware from "../middlewares/jwt-autorization.js";
 
-
-router.get('/validate-token', authMiddleware, (req, res) => {
-    res.status(200).send('Enhorabuena has accedido a una ruta protegida')
+router.get("/validate-token", authMiddleware, (req, res) => {
+  res.status(200).send("Enhorabuena has accedido a una ruta protegida");
 });
 
-router.get('/renew-token', authMiddleware, (req, res) => {
-    res.status(200).send('Enhorabuena has accedido a una ruta protegida')
+router.get("/renew-token", authMiddleware, (req, res) => {
+  res.status(200).send("Enhorabuena has accedido a una ruta protegida");
 });
 
-
-module.exports = router;
+export default router;

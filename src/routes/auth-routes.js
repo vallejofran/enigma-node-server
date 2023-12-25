@@ -1,29 +1,39 @@
-const express = require('express');
-const router = express.Router();
-const { check } = require('express-validator');
+import { Router } from "express";
+const router = Router();
+import { check } from "express-validator";
 
-const authController = require('../controllers/auth-controller')
+import {
+  registerUser,
+  loginUser,
+  googleSignin,
+  validateToken,
+} from "../controllers/auth-controller.js";
 
-const {fieldsValidator} = require('../middlewares/fields-validator')
-const authMiddleware = require('../middlewares/jwt-autorization')
+import fieldsValidator from "../middlewares/fields-validator.js";
+import authMiddleware from "../middlewares/jwt-autorization.js";
 
-
-router.get('/', (req, res) => {
-    res.send('¡Hola, mundo!');
+router.get("/", (req, res) => {
+  res.send("¡Hola, mundo!");
 });
 
-router.post('/register', authController.registerUser);
+router.post("/register", registerUser);
 
-router.post('/login', [
-    check('email', 'El correo es obligatorio').isEmail(),
-    check('password', 'La contraseña es obligatoria').not().isEmpty(),
-    fieldsValidator
-], authController.loginUser);
+router.post(
+  "/login",
+  [
+    check("email", "El correo es obligatorio").isEmail(),
+    check("password", "La contraseña es obligatoria").not().isEmpty(),
+    fieldsValidator,
+  ],
+  loginUser
+);
 
-router.post('/login-google', [
-    check('token', 'El token es necesario').not().isEmpty(),
-], authController.googleSignin);
+router.post(
+  "/login-google",
+  [check("token", "El token es necesario").not().isEmpty()],
+  googleSignin
+);
 
-router.post('/validate-token', authMiddleware, authController.validateToken);
+router.post("/validate-token", authMiddleware, validateToken);
 
-module.exports = router;
+export default router;
