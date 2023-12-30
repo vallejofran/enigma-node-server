@@ -134,6 +134,4 @@ const createMessage = (chatRoom, from, to, message, id = null) => {
   return { chatRoom, from, to, message, id, date: new Date().getTime() };
 };
 
-export default {
-  socketController,
-};
+export default socketController;
