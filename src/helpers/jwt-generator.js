@@ -26,7 +26,15 @@ const JWTVerify = async (token = "") => {
 
     return user;
   } catch (error) {
-    throw new Error(error);
+    if (error.name === "TokenExpiredError") {
+      // El token ha caducado
+      console.error({ error: "Token expirado" });
+      // process.exit(0);
+    } else {
+      // El token es inválido por otra razón
+      console.error(error);
+      // process.exit(0);
+    }
   }
 };
 

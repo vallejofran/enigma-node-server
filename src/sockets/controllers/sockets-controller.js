@@ -1,10 +1,12 @@
 import { Socket } from "socket.io";
-
 import { JWTVerify } from "../../helpers/jwt-generator.js";
 import Users from "../classes/users.js";
+
 const users = new Users();
 
-const socketController = (socket = new Socket(), io) => {
+const socketController = async (socket = new Socket(), io) => {
+  console.log("Socket Controller escuchando...");
+
   // New user connection listener
   socket.on("enterChat", async (data, callback) => {
     // JWT validation
@@ -20,34 +22,48 @@ const socketController = (socket = new Socket(), io) => {
 
     console.log(`User connected: ${user.username} - [${socket.id}]`);
 
-    console.log(data);
     // Check message data sended from client
     if (!data.userName || !data.chatRoom) {
       return callback({
         error: true,
-        message: "Hey! Seems some data neeeded",
+        message: "Hey! Seems some data is neeeded",
       });
     }
 
+    // Remove old user profile from Users collection (DDBB) && leave room
+    const storedUser = users.getUser(socket.id);
+    if (storedUser) {
+      socket.leave(storedUser.chatRoom);
+      users.deleteUser(socket.id);
+      const otherUsers = users.getUsersByRoom(storedUser.chatRoom);
+      socket
+        .to(storedUser.chatRoom)
+        .emit(
+          "userLeftRoom",
+          `${storedUser.userName} has left the room!!`,
+          otherUsers
+        );
+    }
+
+    // Join user to  the new chat room
+    socket.join(data.chatRoom.id);
+
+    // Save user in Users collection (DDBB)
+    users.setUser(socket.id, data.userName, data.chatRoom.id);
+
     // Add the dummy user to chat room of connected user
-    users.setChatRoomToDummyUser(data.chatRoom.name);
-
-    // Join user to chat room
-    socket.join(data.chatRoom.name);
-
-    // Save user in users array (DDBB)
-    users.setUser(socket.id, data.userName, data.chatRoom.name);
+    users.setChatRoomToDummyUser(data.chatRoom.id);
 
     // Get users connected at the same chat room
-    const connectedUsers = users.getUsersByRoom(data.chatRoom.name);
+    const connectedUsers = users.getUsersByRoom(data.chatRoom.id);
 
     // Advise to chatroom's users that new user has been coneected
-    socket.broadcast
-      .to(data.chatRoom.name)
+    socket
+      .to(data.chatRoom.id)
       .emit(
         "newUser",
         createMessage(
-          data.chatRoom.name,
+          data.chatRoom.id,
           "Admin",
           data.userName,
           `${data.userName} is connected!!`
@@ -61,48 +77,42 @@ const socketController = (socket = new Socket(), io) => {
 
   // Client sended message listener
   socket.on("createMessage", (data) => {
-    console.log(data);
-
-    const userTo = users.getUser(data.idSelected);
     const sender = users.getUser(data.idSender);
+    const reciver = users.getUser(data.idReciver);
 
-    if (userTo && sender) {
-      if (userTo.userName == "Everybody")
-        io.to(userTo.chatRoom).emit(
+    if (sender && reciver) {
+      if (reciver.userName == "Everybody")
+        io.to(data.chatRoom).emit(
           "emitMessage",
           createMessage(
             data.chatRoom,
             data.from,
             data.to,
             data.msg,
-            data.idSelected
+            data.idReciver
           )
         );
       else {
-        socket.broadcast
-          .to(userTo.id)
-          .emit(
-            "emitMessage",
-            createMessage(
-              data.chatRoom,
-              data.from,
-              data.to,
-              data.msg,
-              data.idSelected
-            )
-          );
-        socket.broadcast
-          .to(sender.id)
-          .emit(
-            "emitMessage",
-            createMessage(
-              data.chatRoom,
-              data.from,
-              data.to,
-              data.msg,
-              data.idSender
-            )
-          );
+        io.to(reciver.id).emit(
+          "emitMessage",
+          createMessage(
+            data.chatRoom,
+            data.from,
+            data.to,
+            data.msg,
+            data.idReciver
+          )
+        );
+        io.to(sender.id).emit(
+          "emitMessage",
+          createMessage(
+            data.chatRoom,
+            data.from,
+            data.to,
+            data.msg,
+            data.idSender
+          )
+        );
       }
     }
   });

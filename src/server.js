@@ -51,7 +51,6 @@ class ServerApp {
 
   sockets() {
     this.io.on("connection", (socket) => socketController(socket, this.io));
-    // this.io.on('connection', socketController)
   }
 
   listen() {
