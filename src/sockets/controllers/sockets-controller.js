@@ -5,7 +5,7 @@ import Users from "../classes/users.js";
 const users = new Users();
 
 const socketController = async (socket = new Socket(), io) => {
-  console.log("Socket Controller escuchando...");
+  console.log("Socket Controller is watching...");
 
   // New user connection listener
   socket.on("enterChat", async (data, callback) => {

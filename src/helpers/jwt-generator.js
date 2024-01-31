@@ -6,7 +6,7 @@ const JWTgenerator = (payload = "") => {
     jwt.sign(
       payload,
       process.env.SECRET_KEY,
-      { expiresIn: "4h" },
+      { expiresIn: "24h" },
       (err, token) => {
         if (err) reject("No se pudo generar el token");
         else resolve(token);
