@@ -11,10 +11,10 @@ const registerUser = async (req, res) => {
     const { username, firstname, lastname, email, password } = req.body;
 
     // Verificar si el usuario ya existe en la base de datos
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
     if (existingUser)
-      return res.status(400).json({ message: "El usuario ya existe" });
+      return res.status(200).json({ message: "'Nick name' or 'Email' founds in an existing account" });
 
     // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -45,12 +45,12 @@ const loginUser = async (req, res) => {
     // Verificar si el usuario existe en la base de datos
     const user = await User.findOne({ email }).select("+password");
     if (!user)
-      return res.status(200).json({ message: "Usuario no encontrado" });
+      return res.status(200).json({ message: "User not found" });
 
     // Verificar la contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
-      return res.status(200).json({ message: "Contraseña incorrecta" });
+      return res.status(200).json({ message: "Wrong password" });
 
     // Generar un token de autenticación
     const token = await JWTgenerator({ email: user.email });
@@ -61,7 +61,7 @@ const loginUser = async (req, res) => {
     delete userCleaned.__v;
     delete userCleaned._id;
 
-    res.status(200).json({ user: userCleaned, token });
+    res.status(201).json({ user: userCleaned, token });
   } catch (error) {
     res.status(401).json({ error: "Error en el login de usuario" });
   }
@@ -92,8 +92,8 @@ const googleSignin = async (req, res = response) => {
 
     if (!user.state)
       return res
-        .status(401)
-        .json({ message: "Hable con el administrador, user bloqueado" });
+        .status(200)
+        .json({ message: "User blocked, your apologies" });
 
     const token = await JWTgenerator({ email: user.email });
 
@@ -102,16 +102,16 @@ const googleSignin = async (req, res = response) => {
     delete userCleaned.__v;
     delete userCleaned._id;
 
-    res.status(200).json({ user: userCleaned, token });
+    res.status(201).json({ user: userCleaned, token });
   } catch (error) {
-    res.status(400).json({ message: "Token de Google no es válido" });
+    res.status(401).json({ message: "Token de Google no es válido" });
   }
 };
 
 const validateToken = (req, res) => {
   const { params } = req;
   if (params.token) res.status(200).json(params.token);
-  else res.status(400).json({ message: "Token no es válido" });
+  else res.status(401).json({ message: "Token no es válido" });
 };
 
 export { registerUser, loginUser, googleSignin, validateToken };
